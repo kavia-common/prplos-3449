@@ -12,7 +12,7 @@ get_mac_binary() {
 		return
 	fi
 
-	hexdump -v -n 6 -s $offset -e '5/1 "%02x:" 1/1 "%02x"' $path 2>/dev/null
+	hexdump -v -n 6 -s "$offset" -e '5/1 "%02x:" 1/1 "%02x"' "$path" 2>/dev/null
 }
 
 get_mac_label_dt() {
@@ -35,7 +35,7 @@ get_mac_label_json() {
 	[ -s "$cfg" ] || return
 
 	json_init
-	json_load "$(cat $cfg)"
+	json_load "$(cat "$cfg")"
 	if json_is_a system object; then
 		json_select system
 			json_get_var macaddr label_macaddr
@@ -101,13 +101,13 @@ mtd_get_mac_encrypted_arcadyan() {
 	fi
 
 	# Config decryption and getting mac. Trying uencrypt and openssl utils.
-	size=$((0x$(dd if=$part skip=9 bs=1 count=4 2>/dev/null | hexdump -v -e '1/4 "%08x"')))
-	if [[ -f  "/usr/bin/uencrypt" ]]; then
-		mac_dirty=$(dd if=$part bs=1 count=$size skip=$((0x100)) 2>/dev/null | \
-			uencrypt -d -n -k $key -i $iv | grep mac | cut -c 5-)
-	elif [[ -f  "/usr/bin/openssl" ]]; then
-		mac_dirty=$(dd if=$part bs=1 count=$size skip=$((0x100)) 2>/dev/null | \
-			openssl aes-128-cbc -d -nopad -K $key -iv $iv | grep mac | cut -c 5-)
+	size=$((0x$(dd if="$part" skip=9 bs=1 count=4 2>/dev/null | hexdump -v -e '1/4 "%08x"')))
+	if [ -f "/usr/bin/uencrypt" ]; then
+		mac_dirty=$(dd if="$part" bs=1 count="$size" skip=$((0x100)) 2>/dev/null | \
+			uencrypt -d -n -k "$key" -i "$iv" | grep mac | cut -c 5-)
+	elif [ -f "/usr/bin/openssl" ]; then
+		mac_dirty=$(dd if="$part" bs=1 count="$size" skip=$((0x100)) 2>/dev/null | \
+			openssl aes-128-cbc -d -nopad -K "$key" -iv "$iv" | grep mac | cut -c 5-)
 	else
 		echo "mtd_get_mac_encrypted_arcadyan: Neither uencrypt nor openssl was found!" >&2
 		return
@@ -127,11 +127,11 @@ mtd_get_mac_encrypted_deco() {
 
 	tplink_key="3336303032384339"
 
-	key=$(dd if=$mtdname bs=1 skip=16 count=8 2>/dev/null | \
-		uencrypt -n -d -k $tplink_key -c des-ecb | hexdump -v -n 8 -e '1/1 "%02x"')
+	key=$(dd if="$mtdname" bs=1 skip=16 count=8 2>/dev/null | \
+		uencrypt -n -d -k "$tplink_key" -c des-ecb | hexdump -v -n 8 -e '1/1 "%02x"')
 
-	macaddr=$(dd if=$mtdname bs=1 skip=32 count=8 2>/dev/null | \
-		uencrypt -n -d -k $key -c des-ecb | hexdump -v -n 6 -e '5/1 "%02x:" 1/1 "%02x"')
+	macaddr=$(dd if="$mtdname" bs=1 skip=32 count=8 2>/dev/null | \
+		uencrypt -n -d -k "$key" -c des-ecb | hexdump -v -n 6 -e '5/1 "%02x:" 1/1 "%02x"')
 
 	echo $macaddr
 }
@@ -275,7 +275,7 @@ macaddr_unsetbit_mc() {
 
 macaddr_random() {
 	local randsrc=$(get_mac_binary /dev/urandom 0)
-	
+
 	echo "$(macaddr_unsetbit_mc "$(macaddr_setbit_la "${randsrc}")")"
 }
 

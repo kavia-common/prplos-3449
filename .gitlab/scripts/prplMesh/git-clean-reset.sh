@@ -1,9 +1,10 @@
-#!/bin/sh -e
+#!/bin/sh
+set -eu
 
 # Reset the repository pointed by $1 to the revision given by $2
 
 cd "$1" || {
-    echo "Failed to cd into \"$1 \". Skipping reset."
+    echo "Failed to cd into \"$1\". Skipping reset."
     exit 1
 }
 

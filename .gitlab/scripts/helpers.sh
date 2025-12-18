@@ -1,8 +1,9 @@
 #!/bin/bash
+set -euo pipefail
 
-log_error() { echo -e "\e[91m❌ ERROR: $*\e[0m"; }
-log_success() { echo -e "\e[92m✅ $*\e[0m"; }
-log_info() { echo -e "\e[93m💡 $*\e[0m"; }
+log_error() { printf '\e[91m❌ ERROR: %s\e[0m\n' "$*"; }
+log_success() { printf '\e[92m✅ %s\e[0m\n' "$*"; }
+log_info() { printf '\e[93m💡 %s\e[0m\n' "$*"; }
 
 # section_start - Start a collapsible section in GitLab CI job logs
 #
@@ -31,7 +32,7 @@ section_start() {
 		collapsed_flag="true"
 	fi
 
-	echo -e "section_start:$(date +%s):${section_title}[collapsed=${collapsed_flag}]\r\e[0K\e[95m📦 ${section_description}\e[0m"
+	printf 'section_start:%s:%s[collapsed=%s]\r\e[0K\e[95m📦 %s\e[0m\n' "$(date +%s)" "${section_title}" "${collapsed_flag}" "${section_description}"
 }
 
 # section_end - End a collapsible section in GitLab CI job logs
@@ -54,5 +55,5 @@ section_start() {
 section_end() {
 	local section_title="${1}"
 
-	echo -e "section_end:$(date +%s):${section_title}\r\e[0K"
+	printf 'section_end:%s:%s\r\e[0K\n' "$(date +%s)" "${section_title}"
 }
