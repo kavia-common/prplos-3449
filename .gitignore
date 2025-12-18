@@ -35,3 +35,4 @@ git-src
 .cproject
 .ccache
 .vscode*
+.file_activity_report.json
